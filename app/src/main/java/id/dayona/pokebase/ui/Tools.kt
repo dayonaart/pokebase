@@ -2,6 +2,9 @@ package id.dayona.pokebase.ui
 
 import android.os.Build
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,8 +20,20 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import coil.size.Size
+import id.dayona.pokebase.R
 
 object Tools {
+
+  @Composable
+  fun Loading() {
+    Column(
+      modifier = Modifier.fillMaxSize(),
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.Center
+    ) {
+      Giffy(url = R.raw.pokeball_loading)
+    }
+  }
   @Composable
   fun Giffy(
     url: Any, size: Dp = 200.dp

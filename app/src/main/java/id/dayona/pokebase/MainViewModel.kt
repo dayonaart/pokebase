@@ -9,7 +9,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import id.dayona.pokeservices.PokeServices
-import id.dayona.pokeservices.data.Pokemon
+import id.dayona.pokeservices.data.EvoChain
+import id.dayona.pokeservices.data.PokemonData
 import id.dayona.pokeservices.network.CoreError
 import id.dayona.pokeservices.network.CoreException
 import id.dayona.pokeservices.network.CoreSuccess
@@ -24,42 +25,46 @@ import kotlinx.coroutines.launch
 class MainViewModel : ViewModel() {
   private val pokeServices = PokeServices()
   var searchController by mutableStateOf("")
-  var pokeList by mutableStateOf<List<Pokemon?>>(listOf())
-  val getDefaultPokemon = 320
+  var pokeList by mutableStateOf<List<PokemonData?>>(listOf())
+  var pokemonData by mutableStateOf<PokemonData?>(null)
+  var evoChain by mutableStateOf<List<EvoChain?>>(listOf())
+  val getDefaultEvoChain = 10 * 20
   private val mediaPlayer = MediaPlayer()
 
   init {
-    getPokemon()
+    getEvoChain()
     mediaPlayer.setAudioAttributes(
       AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
     )
   }
 
 
-  private fun getPokemon() {
+  private fun getEvoChain() {
     viewModelScope.launch(Dispatchers.IO) {
       delay(1000)
-      pokeList = Utilities.readPokemon() ?: listOf()
-      if (pokeList.size >= getDefaultPokemon) return@launch
-      (pokeList.size + 1..getDefaultPokemon).forEachIndexed { _, i ->
-        pokeServices.repositories.getPokemon("$i").collectLatest {
+      evoChain = Utilities.readEvoChainData() ?: listOf()
+      if (evoChain.size >= getDefaultEvoChain) return@launch
+      (evoChain.size + 1..getDefaultEvoChain).forEachIndexed { _, i ->
+        pokeServices.repositories.getEvoChain("$i").collectLatest {
           when (it) {
             is CoreError -> {
-              pokeList += null
+              evoChain += null
             }
 
             is CoreException -> {
-              pokeList += null
+              evoChain += null
             }
 
             is CoreSuccess -> {
-              println("get ${it.data.id} : ${it.data.name}")
-              pokeList += it.data
-              Utilities.savePokemon(Gson().toJson(pokeList))
+              println("evo chain ${it.data.id} ${it.data.chain?.speciesData?.name}")
+              evoChain += it.data
+              if (i % 10 == 0) {
+                Utilities.saveEvoChainData(Gson().toJson(evoChain))
+              }
             }
 
             CoreTimeout -> {
-              pokeList += null
+              evoChain += null
             }
 
             Loading -> {
@@ -70,6 +75,32 @@ class MainViewModel : ViewModel() {
     }
   }
 
+  fun getPokemon(id: String) {
+    pokemonData = null
+    viewModelScope.launch(Dispatchers.IO) {
+      pokeServices.repositories.getPokemon(id).collectLatest {
+        when (it) {
+          is CoreError -> {
+            pokemonData = null
+          }
+
+          is CoreException -> {
+            pokemonData = null
+          }
+
+          is CoreSuccess -> {
+            pokemonData = it.data
+          }
+
+          CoreTimeout -> {
+            pokemonData = null
+          }
+
+          Loading -> {}
+        }
+      }
+    }
+  }
   fun cries(url: String?) {
     viewModelScope.launch(Dispatchers.IO) {
       try {
@@ -89,9 +120,10 @@ class MainViewModel : ViewModel() {
   }
 
   private fun searchPokemon() {
-    val f = Utilities.readPokemon()?.filter { it?.name?.startsWith(searchController) ?: false }
-    pokeList = if (f?.isEmpty() == true) {
-      Utilities.readPokemon() ?: listOf()
+    val f = Utilities.readEvoChainData()
+      ?.filter { it?.chain?.speciesData?.name?.startsWith(searchController) ?: false }
+    evoChain = if (f?.isEmpty() == true) {
+      Utilities.readEvoChainData() ?: listOf()
     } else {
       f ?: listOf()
     }

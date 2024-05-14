@@ -28,12 +28,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import coil.compose.AsyncImage
 import id.dayona.pokebase.ui.Home
-import id.dayona.pokebase.ui.PokemonData
+import id.dayona.pokebase.ui.PokeDetail
+import id.dayona.pokebase.ui.PokeTable
 import id.dayona.pokebase.ui.theme.PokeBaseTheme
 
 class MainActivity : ComponentActivity() {
@@ -63,7 +66,7 @@ class MainActivity : ComponentActivity() {
         Surface(
           modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
         ) {
-          Scaffold(modifier = Modifier.padding(10.dp), topBar = {
+          Scaffold(modifier = Modifier.padding(top = 10.dp), topBar = {
             Card(
               modifier = Modifier
                 .fillMaxWidth()
@@ -87,13 +90,25 @@ class MainActivity : ComponentActivity() {
           }, bottomBar = { TabView(tabBarItems, navController) }) { innerPad ->
             NavHost(navController = navController, startDestination = homeTab.title) {
               composable(homeTab.title) {
-                Home.View(mainViewModel = mainViewModel, innerPad = innerPad)
+                Home.View(
+                  mainViewModel = mainViewModel, innerPad = innerPad, navController = navController
+                )
               }
               composable(alertsTab.title) {
-                PokemonData.View(mainViewModel = mainViewModel, innerPad = innerPad)
+                PokeTable.View(mainViewModel = mainViewModel, innerPad = innerPad)
               }
               composable(settingsTab.title) {
                 Text(settingsTab.title)
+              }
+              composable(
+                "poke_detail/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+              ) {
+                PokeDetail.View(
+                  mainViewModel = mainViewModel,
+                  innerPad = innerPad,
+                  it.arguments?.getString("id") ?: ""
+                )
               }
             }
           }
