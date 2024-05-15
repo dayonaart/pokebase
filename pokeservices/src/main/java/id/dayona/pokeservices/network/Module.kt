@@ -1,12 +1,12 @@
 package id.dayona.pokeservices.network
 
-import id.dayona.pokeservices.data.EvoChain
-import id.dayona.pokeservices.data.PokemonData
-import id.dayona.pokeservices.data.SpeciesData
+import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
+import id.dayona.pokeservices.pokedata.evourl.EvolutionUrl
+import id.dayona.pokeservices.pokedata.pokemon.Pokemon
 import id.dayona.pokeservices.repositories.BASE_URL
-import id.dayona.pokeservices.repositories.GET_EVO_CHAIN
+import id.dayona.pokeservices.repositories.GET_EVOLUTION_CHAIN
+import id.dayona.pokeservices.repositories.GET_EVOLUTION_CHAIN_URL
 import id.dayona.pokeservices.repositories.GET_POKEMON
-import id.dayona.pokeservices.repositories.GET_SPECIES
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
@@ -41,13 +41,14 @@ internal object Module {
 
 internal interface Services {
   @Headers("Content-Type: application/json; charset=utf-8")
-  @GET(GET_POKEMON)
-  suspend fun getPokemon(@Path("id") id: String): Response<PokemonData>
-  @Headers("Content-Type: application/json; charset=utf-8")
-  @GET(GET_SPECIES)
-  suspend fun getSpecies(@Path("id") id: String): Response<SpeciesData>
+  @GET(GET_EVOLUTION_CHAIN_URL)
+  suspend fun getEvolutionUrl(): Response<EvolutionUrl>
 
   @Headers("Content-Type: application/json; charset=utf-8")
-  @GET(GET_EVO_CHAIN)
-  suspend fun getEvoChain(@Path("id") id: String): Response<EvoChain>
+  @GET(GET_EVOLUTION_CHAIN)
+  suspend fun getEvolutionChain(@Path("id") id: String): Response<EvolutionChain>
+
+  @Headers("Content-Type: application/json; charset=utf-8")
+  @GET(GET_POKEMON)
+  suspend fun getPokemon(@Path("id") id: String): Response<Pokemon>
 }

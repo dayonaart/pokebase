@@ -1,8 +1,6 @@
 package id.dayona.pokeservices.repositories
 
-import id.dayona.pokeservices.data.EvoChain
-import id.dayona.pokeservices.data.PokemonData
-import id.dayona.pokeservices.data.SpeciesData
+import com.google.gson.Gson
 import id.dayona.pokeservices.network.Core
 import id.dayona.pokeservices.network.CoreError
 import id.dayona.pokeservices.network.CoreException
@@ -10,6 +8,10 @@ import id.dayona.pokeservices.network.CoreSuccess
 import id.dayona.pokeservices.network.CoreTimeout
 import id.dayona.pokeservices.network.Loading
 import id.dayona.pokeservices.network.Module
+import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
+import id.dayona.pokeservices.pokedata.pokemon.Pokemon
+import id.dayona.pokeservices.util.Utilities
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
@@ -19,17 +21,39 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 internal class RepoImpl : Repositories {
+  override fun evolutionChainSize(): Int {
+    return Constant.POKEMON_SIZE
+  }
 
-  override suspend fun getPokemon(id: String): Flow<Core<PokemonData>> {
+  override suspend fun getEvolutionChainList(): Flow<Core<List<EvolutionChain?>>> {
     return flow {
       emit(Loading)
-      val res = Module.repo().getPokemon(id)
       try {
-        if (!res.isSuccessful) {
-          emit(CoreError(code = res.code(), message = res.message()))
-          return@flow
+        delay(500)
+        val existing = Utilities.readEvoChainData().toMutableList()
+        if (existing.size >= Constant.POKEMON_SIZE) {
+          emit(CoreSuccess(data = existing.toList()))
         }
-        emit(CoreSuccess(data = res.body()!!))
+        ((existing.size + 1)..Constant.POKEMON_SIZE).forEachIndexed { _, i ->
+          val evo = Module.repo().getEvolutionChain("$i")
+          if (evo.isSuccessful) {
+            val sprite = Module.repo().getPokemon("${evo.body()?.chain?.species?.name}")
+            if (sprite.isSuccessful) {
+              existing += evo.body()?.copy(sprites = sprite.body()?.sprites)
+              Utilities.saveEvoChainData(Gson().toJson(existing.toList()))
+              emit(CoreSuccess(data = existing.toList()))
+            } else {
+              existing += evo.body()
+              Utilities.saveEvoChainData(Gson().toJson(existing.toList()))
+              emit(CoreSuccess(data = existing.toList()))
+            }
+          } else {
+            existing += evo.body()
+            Utilities.saveEvoChainData(Gson().toJson(existing.toList()))
+            emit(CoreSuccess(data = existing.toList()))
+          }
+
+        }
       } catch (e: SocketTimeoutException) {
         emit(CoreTimeout)
       } catch (e: SocketException) {
@@ -46,20 +70,13 @@ internal class RepoImpl : Repositories {
     }
   }
 
-  override suspend fun getEvoChain(id: String): Flow<Core<EvoChain>> {
+  override suspend fun getPokemon(id: String): Flow<Core<Pokemon?>> {
     return flow {
       emit(Loading)
-      val res = Module.repo().getEvoChain(id)
       try {
-        if (!res.isSuccessful) {
-          emit(CoreError(code = res.code(), message = res.message()))
-          return@flow
-        }
-        val data = res.body()!!
-        val getSprite = Module.repo().getPokemon(data.chain?.speciesData?.name ?: "")
-        if (!getSprite.isSuccessful) emit(CoreSuccess(data = res.body()!!))
-        emit(CoreSuccess(data = res.body()!!.copy(sprites = getSprite.body()!!.sprites)))
-
+        val res = Module.repo().getPokemon(id)
+        if (!res.isSuccessful) emit(CoreError(code = res.code(), message = res.message()))
+        emit(CoreSuccess(data = res.body()))
       } catch (e: SocketTimeoutException) {
         emit(CoreTimeout)
       } catch (e: SocketException) {
@@ -76,38 +93,11 @@ internal class RepoImpl : Repositories {
     }
   }
 
-  override suspend fun getSpecies(id: String): Flow<Core<SpeciesData>> {
-    return flow {
-      emit(Loading)
-      val res = Module.repo().getSpecies(id)
-      try {
-        if (!res.isSuccessful) {
-          emit(CoreError(code = res.code(), message = res.message()))
-          return@flow
-        }
-        emit(CoreSuccess(data = res.body()!!))
-      } catch (e: SocketTimeoutException) {
-        emit(CoreTimeout)
-      } catch (e: SocketException) {
-        emit(CoreException(e = "${e.message}"))
-      } catch (e: UnknownHostException) {
-        emit(CoreException(e = "${e.message}"))
-      } catch (e: IOException) {
-        emit(CoreException(e = "${e.message}"))
-      } catch (e: HttpException) {
-        emit(CoreException(e = "${e.message}"))
-      } catch (e: Exception) {
-        emit(CoreException(e = "${e.message}"))
-      }
+  override fun searchEvolutionChainList(name: String): List<EvolutionChain?> {
+    val f =
+      Utilities.readEvoChainData().filter { it?.chain?.species?.name?.startsWith(name) ?: false }
+    return f.ifEmpty {
+      Utilities.readEvoChainData()
     }
   }
-
-  override suspend fun getSprite(id: String): Flow<Core<Any>> {
-    TODO("Not yet implemented")
-  }
-
-  override suspend fun getAnimation(id: String): Flow<Core<Any>> {
-    TODO("Not yet implemented")
-  }
-
 }

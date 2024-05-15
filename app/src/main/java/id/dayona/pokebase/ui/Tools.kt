@@ -25,13 +25,13 @@ import id.dayona.pokebase.R
 object Tools {
 
   @Composable
-  fun Loading() {
+  fun Loading(size: Int = 200) {
     Column(
       modifier = Modifier.fillMaxSize(),
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center
     ) {
-      Giffy(url = R.raw.pokeball_loading)
+      Giffy(url = R.raw.pokeball_loading, size = size.dp)
     }
   }
   @Composable

@@ -58,20 +58,20 @@ object Home {
 
   @Composable
   private fun PokeList(mainViewModel: MainViewModel, navController: NavController) {
-    if (mainViewModel.evoChain.isEmpty()) {
+    if (mainViewModel.evolutionChainList.isEmpty()) {
       Loading()
     } else {
       LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = 120.dp)
       ) {
-        items(mainViewModel.evoChain.take(50).size) {
-          val poke = mainViewModel.evoChain[it]
+        items(mainViewModel.evolutionChainList.take(500).size) {
+          val poke = mainViewModel.evolutionChainList[it]
           val sprite = poke?.sprites?.other?.showdown?.frontDefault
           Card(modifier = Modifier
             .padding(10.dp)
             .clickable {
-              mainViewModel.pokemonData = null
-              navController.navigate("poke_detail/${poke?.chain?.speciesData?.name}")
+              mainViewModel.getPokemon(poke?.chain?.species?.name ?: "")
+              navController.navigate("poke_detail/${poke?.chain?.species?.name}")
             }) {
             Column {
               Text(
@@ -81,7 +81,7 @@ object Home {
                 url = "$sprite", size = 80.dp
               )
               Text(
-                modifier = Modifier.fillMaxWidth(), text = "${poke?.chain?.speciesData?.name}",
+                modifier = Modifier.fillMaxWidth(), text = "${poke?.chain?.species?.name}",
                 textAlign = TextAlign.Center
               )
             }

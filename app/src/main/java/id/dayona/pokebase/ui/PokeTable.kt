@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import id.dayona.pokebase.MainViewModel
 import id.dayona.pokebase.R
 import id.dayona.pokebase.ui.Tools.Giffy
-import id.dayona.pokeservices.data.EvoChain
+import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
 
 object PokeTable {
   @Composable
@@ -35,21 +35,21 @@ object PokeTable {
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center
     ) {
-      if (mainViewModel.evoChain.size < mainViewModel.getDefaultEvoChain) {
+      if (mainViewModel.evolutionChainList.size < mainViewModel.defaultEvolutionChainSize) {
         Giffy(url = R.raw.pokeball_loading)
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-          text = "Please wait while\ngetting Pokemon data ${mainViewModel.evoChain.size * 100 / mainViewModel.getDefaultEvoChain}%",
+          text = "Please wait while\ngetting Pokemon data ${mainViewModel.evolutionChainProgress}%",
           textAlign = TextAlign.Center
         )
       } else {
-        Table(mainViewModel.evoChain)
+        Table(mainViewModel.evolutionChainList)
       }
     }
   }
 
   @Composable
-  private fun Table(pokeList: List<EvoChain?>) {
+  private fun Table(pokeList: List<EvolutionChain?>) {
     val cw1 = 15f
     val cw2 = 55f
     val cw3 = 35f
@@ -68,7 +68,7 @@ object PokeTable {
       items(pokeList.size) {
         Row(Modifier.fillMaxWidth()) {
           TableCell(text = "${pokeList[it]?.id}", weight = cw1)
-          TableCell(text = "${pokeList[it]?.chain?.speciesData?.name}", weight = cw2)
+          TableCell(text = "${pokeList[it]?.chain?.species?.name}", weight = cw2)
           TableCell(
             text = "${pokeList[it]?.chain?.isBaby}",
             weight = cw3
