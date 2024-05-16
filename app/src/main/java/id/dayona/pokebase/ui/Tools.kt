@@ -40,7 +40,7 @@ object Tools {
       if (label != null) {
         Spacer(modifier = Modifier.height(20.dp))
         Text(
-          text = "Please wait while\ngetting Pokemon data ${MainModel.mainViewModel.evolutionChainList.progress}%",
+          text = "Please wait while\ngetting Pokemon data ${MainModel.mainViewModel.evoList.progress}%",
           textAlign = TextAlign.Center
         )
       }

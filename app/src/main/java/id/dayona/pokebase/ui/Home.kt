@@ -33,8 +33,8 @@ object Home {
     innerPad: PaddingValues, navController: NavController
   ) {
     val fieldFocus = LocalFocusManager.current
-    if (mainViewModel.evolutionChainList.data.isEmpty()) {
-      Loading(label = "Please wait while\ngetting Pokemon data ${mainViewModel.evolutionChainList.progress}%")
+    if (mainViewModel.evoList.data.isEmpty()) {
+      Loading(label = "Please wait while\ngetting Pokemon data ${mainViewModel.evoList.progress}%")
     } else {
       Column(
         modifier = Modifier
@@ -67,8 +67,8 @@ object Home {
     LazyVerticalGrid(
       columns = GridCells.Adaptive(minSize = 120.dp)
     ) {
-      items(mainViewModel.evolutionChainList.data.take(50).size) {
-        val poke = mainViewModel.evolutionChainList.data[it]
+      items(mainViewModel.evoList.data.take(50).size) {
+        val poke = mainViewModel.evoList.data[it]
         val sprite = poke?.sprites?.other?.showdown?.frontDefault
         Card(modifier = Modifier
           .padding(10.dp)

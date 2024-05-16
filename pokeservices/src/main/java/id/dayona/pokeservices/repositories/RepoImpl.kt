@@ -107,7 +107,6 @@ internal class RepoImpl : Repositories {
         )
         return@flow
       }
-      val destinationFile = Utilities.downloadPath
       val body = Module.privateRepo().downloadDatabase().body()
       if (body == null) {
         emit(CoreError(code = 999, message = "Error while downloading database"))
@@ -115,7 +114,7 @@ internal class RepoImpl : Repositories {
       }
       try {
         body.byteStream().use { inputStream ->
-          destinationFile.outputStream().use { outputStream ->
+          Utilities.EVO_EXTERNAL_FILE_DB.outputStream().use { outputStream ->
             val totalBytes = body.contentLength()
             val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
             var progressBytes = 0L

@@ -69,7 +69,7 @@ object PokeDetail {
     val tabEnt = listOf(baseStats, evolution, artWork, settingsTab)
     val navController = rememberNavController()
     val evolutionChain =
-      mainViewModel.evolutionChainList.data.find { it?.chain?.species?.name == id }
+      mainViewModel.evoList.data.find { it?.chain?.species?.name == id }
     Column(
       modifier = Modifier
         .padding(innerPad)

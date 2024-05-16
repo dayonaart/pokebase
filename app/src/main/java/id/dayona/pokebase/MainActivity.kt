@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
     MainModel.mainViewModel = mainViewModel
     //MUST BE INIT HERE FOR DATABASE
-//    this.getExternalFilesDirs("database")
+    this.getExternalFilesDirs("database")
     val tabBarItems = listOf(homeTab, alertsTab, settingsTab)
     setContent {
       val navController = rememberNavController()

@@ -12,24 +12,26 @@ internal object Utilities {
   enum class StoragePath { Movies, Notifications, Alarms, DCIM, Download, Documents, Music, Ringtones, Recordings, Pictures, Audiobooks }
 
   @Suppress("SdCardPath")
-  val downloadPath = File(
+  val EVO_DOWNLOAD_PATH = File(
     File("/sdcard").listFiles()
       ?.find { it.name.startsWith(StoragePath.Download.name) }, "evo_chain.db"
   )
 
   @Suppress("SdCardPath")
-  private const val EVO_SYSTEM_DB = "/data/user/0/id.dayona.pokebase/evo_chain.db"
+  val EVO_SYSTEM_DB = File("/data/user/0/id.dayona.pokebase/evo_chain.db")
 
-  private const val EVO_EXTERNAL_MEDIA_DBS =
+  val EVO_EXTERNAL_MEDIA_DB = File(
     "/storage/emulated/0/Android/media/id.dayona.pokebase/evo_chain.db"
-  private const val EVO_EXTERNAL_FILE_DBS =
+  )
+  val EVO_EXTERNAL_FILE_DB = File(
     "/storage/emulated/0/Android/data/id.dayona.pokebase/files/database/evo_chain.db"
+  )
 
 
   internal suspend fun saveEvoChainData(data: String) {
     try {
       val writer = withContext(Dispatchers.IO) {
-        FileWriter(downloadPath)
+        FileWriter(EVO_EXTERNAL_FILE_DB)
       }
       withContext(Dispatchers.IO) {
         writer.write(data)
@@ -45,7 +47,7 @@ internal object Utilities {
   internal fun readEvoChainData(): List<EvolutionChain?> {
     return try {
       val data: List<EvolutionChain?> = Gson().fromJson(
-        downloadPath.readText(), object : TypeToken<List<EvolutionChain>>() {}.type
+        EVO_EXTERNAL_FILE_DB.readText(), object : TypeToken<List<EvolutionChain>>() {}.type
       )
       data.filterNotNull().sortedBy { it.id }
     } catch (e: Exception) {

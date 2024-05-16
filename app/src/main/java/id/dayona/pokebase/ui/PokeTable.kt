@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import id.dayona.pokebase.MainModel.mainViewModel
-import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
 
 object PokeTable {
   @Composable
@@ -30,12 +29,13 @@ object PokeTable {
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.Center
     ) {
-      Table(mainViewModel.evolutionChainList.data)
+      Table()
     }
   }
 
   @Composable
-  private fun Table(pokeList: List<EvolutionChain?>) {
+  private fun Table() {
+    val pokeList = mainViewModel.evoTable.data
     val cw1 = 15f
     val cw2 = 55f
     val cw3 = 35f

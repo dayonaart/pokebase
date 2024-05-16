@@ -26,7 +26,12 @@ object MainModel {
 class MainViewModel : ViewModel() {
   private val pokeServices = PokeServices()
   var pokemon by mutableStateOf<Pokemon?>(null)
-  var evolutionChainList by mutableStateOf(
+  var evoList by mutableStateOf(
+    EvolutionData(
+      data = listOf(), progress = 0
+    )
+  )
+  var evoTable by mutableStateOf(
     EvolutionData(
       data = listOf(), progress = 0
     )
@@ -59,7 +64,8 @@ class MainViewModel : ViewModel() {
           }
 
           is CoreSuccess -> {
-            evolutionChainList = it.data
+            evoList = it.data
+            evoTable = it.data
           }
 
           CoreTimeout -> {
@@ -123,7 +129,7 @@ class MainViewModel : ViewModel() {
   }
 
   private fun searchPokemon() {
-    evolutionChainList = pokeServices.repositories.searchEvolutionChainList(searchController)
+    evoList = pokeServices.repositories.searchEvolutionChainList(searchController)
   }
 
   fun calculateBaseAtb(atb: Float): Int {
