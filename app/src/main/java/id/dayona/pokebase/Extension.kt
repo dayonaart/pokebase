@@ -1,6 +1,13 @@
 package id.dayona.pokebase
 
 import androidx.compose.ui.graphics.Color
+import id.dayona.pokebase.ui.theme.Black
+import id.dayona.pokebase.ui.theme.Cyan
+import id.dayona.pokebase.ui.theme.Lime
+import id.dayona.pokebase.ui.theme.Olive
+import id.dayona.pokebase.ui.theme.Orange
+import id.dayona.pokebase.ui.theme.Red
+import id.dayona.pokebase.ui.theme.Yellow
 
 fun String?.shortAtbName(): String? {
   return this?.replace("attack", "Atk")?.replace("defense", "Def")?.replace("special", "Sp")
@@ -19,31 +26,31 @@ fun Float.atb(): Float {
 fun String.atbColor(): Color {
   when (this) {
     "hp" -> {
-      return Color.Green.copy(alpha = 0.5f)
+      return Lime
     }
 
     "attack" -> {
-      return Color.Red.copy(alpha = 0.5f)
+      return Red
     }
 
     "defense" -> {
-      return Color.Blue.copy(alpha = 0.5f)
+      return Olive
     }
 
     "special-attack" -> {
-      return Color.Yellow.copy(alpha = 0.5f)
+      return Cyan
     }
 
     "special-defense" -> {
-      return Color.Magenta.copy(alpha = 0.5f)
+      return Orange
     }
 
     "speed" -> {
-      return Color.Cyan.copy(alpha = 0.5f)
+      return Yellow
     }
 
     else -> {
-      return Color.Black
+      return Black
     }
   }
 }

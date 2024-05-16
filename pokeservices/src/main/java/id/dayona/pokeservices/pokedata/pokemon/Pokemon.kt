@@ -50,6 +50,7 @@ data class Pokemon(
   @field:SerializedName("order") val order: Int? = null
 )
 
+
 data class RubySapphire(
 
   @field:SerializedName("back_default") val backDefault: String? = null,

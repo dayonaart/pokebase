@@ -3,7 +3,6 @@ package id.dayona.pokebase
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.IntSize
@@ -15,37 +14,41 @@ import id.dayona.pokeservices.network.CoreException
 import id.dayona.pokeservices.network.CoreSuccess
 import id.dayona.pokeservices.network.CoreTimeout
 import id.dayona.pokeservices.network.Loading
-import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
+import id.dayona.pokeservices.pokedata.evochain.EvolutionData
 import id.dayona.pokeservices.pokedata.pokemon.Pokemon
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-
+object MainModel {
+  lateinit var mainViewModel: MainViewModel
+}
 class MainViewModel : ViewModel() {
   private val pokeServices = PokeServices()
   var pokemon by mutableStateOf<Pokemon?>(null)
-  var evolutionChainList by mutableStateOf(listOf<EvolutionChain?>())
-  val defaultEvolutionChainSize = pokeServices.repositories.evolutionChainSize()
-  var evolutionChainProgress by mutableIntStateOf(0)
+  var evolutionChainList by mutableStateOf(
+    EvolutionData(
+      data = listOf(), progress = 0
+    )
+  )
   var searchController by mutableStateOf("")
   private val mediaPlayer = MediaPlayer()
-  var screenSize by mutableStateOf(IntSize.Zero)
-  val MAX_ATB = 300
+  private var screenSize by mutableStateOf(IntSize.Zero)
+  private val maxAtb = 300
   var getPokeLoading by mutableStateOf(false)
+  var darkMode by mutableStateOf(false)
 
 
   init {
-    getEvolutionChainList()
+    getEvolutionList()
     mediaPlayer.setAudioAttributes(
       AudioAttributes.Builder().setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
     )
   }
 
-
-  private fun getEvolutionChainList() {
+  private fun getEvolutionList() {
     viewModelScope.launch(Dispatchers.IO) {
-      pokeServices.repositories.getEvolutionChainList().collectLatest {
+      pokeServices.repositories.getEvoDatabase().collectLatest {
         when (it) {
           is CoreError -> {
             println(it.message)
@@ -57,19 +60,19 @@ class MainViewModel : ViewModel() {
 
           is CoreSuccess -> {
             evolutionChainList = it.data
-            evolutionChainProgress = (it.data.size * 100) / defaultEvolutionChainSize
           }
 
           CoreTimeout -> {
             println(it.toString())
           }
 
-          Loading -> {}
+          Loading -> {
+            println(it.toString())
         }
       }
     }
   }
-
+  }
   fun getPokemon(id: String) {
     viewModelScope.launch(Dispatchers.IO) {
       pokeServices.repositories.getPokemon(id).collectLatest {
@@ -124,7 +127,12 @@ class MainViewModel : ViewModel() {
   }
 
   fun calculateBaseAtb(atb: Float): Int {
-    println((atb.toInt() * screenSize.width.div(MAX_ATB)) + (screenSize.width % MAX_ATB))
-    return (atb.toInt() * screenSize.width.div(MAX_ATB)) + (screenSize.width % MAX_ATB)
+    println((atb.toInt() * screenSize.width.div(maxAtb)) + (screenSize.width % maxAtb))
+    return (atb.toInt() * screenSize.width.div(maxAtb)) + (screenSize.width % maxAtb)
+  }
+
+  fun changeThemeMode() {
+    darkMode = !darkMode
   }
 }
+

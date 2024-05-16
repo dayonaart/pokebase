@@ -3,7 +3,10 @@ package id.dayona.pokeservices.pokedata.evochain
 import com.google.gson.annotations.SerializedName
 import id.dayona.pokeservices.pokedata.Sprites
 
-
+data class EvolutionData(
+  @field:SerializedName("data") val data: List<EvolutionChain?> = listOf(),
+  @field:SerializedName("progress") val progress: Int = 0,
+)
 data class EvolutionChain(
 
   @field:SerializedName("chain") val chain: Chain? = null,

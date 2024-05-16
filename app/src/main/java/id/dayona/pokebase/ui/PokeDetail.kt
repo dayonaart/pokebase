@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -26,15 +28,11 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import id.dayona.pokebase.MainViewModel
+import id.dayona.pokebase.MainModel.mainViewModel
 import id.dayona.pokebase.TabBarItem
 import id.dayona.pokebase.TabView
 import id.dayona.pokebase.atb
@@ -42,16 +40,20 @@ import id.dayona.pokebase.atbColor
 import id.dayona.pokebase.shortAtbName
 import id.dayona.pokebase.ui.Tools.Giffy
 import id.dayona.pokebase.ui.Tools.Loading
+import id.dayona.pokebase.ui.theme.Typography
 import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
 import java.util.Locale
 
 object PokeDetail {
-  lateinit var mainViewModel: MainViewModel
   private val baseStats = TabBarItem(
     title = "Base Stats"
   )
   private val evolution = TabBarItem(
     title = "Evolution",
+
+    )
+  private val artWork = TabBarItem(
+    title = "Art Work",
 
     )
   private val settingsTab = TabBarItem(
@@ -62,19 +64,18 @@ object PokeDetail {
   fun View(innerPad: PaddingValues, id: String) {
     ScaffoldView(innerPad, id)
   }
-
   @Composable
   private fun ScaffoldView(innerPad: PaddingValues, id: String) {
-    val tabEnt = listOf(baseStats, evolution, settingsTab)
+    val tabEnt = listOf(baseStats, evolution, artWork, settingsTab)
     val navController = rememberNavController()
-    val evolutionChain = mainViewModel.evolutionChainList.find { it?.chain?.species?.name == id }
+    val evolutionChain =
+      mainViewModel.evolutionChainList.data.find { it?.chain?.species?.name == id }
     Column(
       modifier = Modifier
         .padding(innerPad)
-        .background(color = Color.White)
     ) {
       Giffy(url = evolutionChain?.sprites?.other?.officialArtwork?.frontDefault ?: "")
-      Scaffold(topBar = { TabView(tabEnt, navController) }) { ip ->
+      Scaffold(topBar = { TabView(tabEnt, navController, tabHeight = 50) }) { ip ->
         NavHost(navController = navController, startDestination = tabEnt.first().title) {
           tabEnt.forEach { t ->
             composable(t.title) {
@@ -83,7 +84,7 @@ object PokeDetail {
                   BaseStats(ip, evolutionChain)
                 }
 
-                "Table" -> {
+                "Evolution" -> {
                   Column(
                     modifier = Modifier
                       .padding(innerPad)
@@ -95,7 +96,27 @@ object PokeDetail {
                   }
                 }
 
-                "Setting" -> {
+                "Art Work" -> {
+                  val sprites = mainViewModel.pokemon?.sprites?.toList()
+                    ?.filterNotNull()?.filter { f -> !(f as String).contains(".svg") }
+                  Column(
+                    modifier = Modifier
+                      .padding(ip)
+                      .fillMaxSize(),
+                  ) {
+                    LazyVerticalGrid(
+                      columns = GridCells.Adaptive(minSize = 120.dp)
+                    ) {
+                      items(sprites?.size ?: 0) {
+                        Giffy(
+                          url = "${sprites?.get(it)}", size = 80.dp
+                        )
+                      }
+                    }
+                  }
+                }
+
+                "Settings" -> {
                   Column(
                     modifier = Modifier
                       .padding(innerPad)
@@ -134,7 +155,6 @@ object PokeDetail {
     Column(
       modifier = Modifier
         .padding(innerPad)
-        .background(color = Color.White)
         .fillMaxSize()
         .padding(10.dp)
         .verticalScroll(rememberScrollState()),
@@ -146,10 +166,7 @@ object PokeDetail {
               Locale.getDefault()
             ) else it.toString()
           }
-        }", style = TextStyle(
-          fontSize = 25.sp, fontWeight = FontWeight.ExtraBold, color = Color.Black
-        ))
-
+        }", style = Typography.titleLarge)
       }
       Spacer(modifier = Modifier.height(20.dp))
       if (!mainViewModel.getPokeLoading) {
@@ -163,18 +180,14 @@ object PokeDetail {
               modifier = Modifier.width(60.dp)
             ) {
               Text(
-                text = "${state.name.shortAtbName()}", style = TextStyle(
-                  color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Bold
-                )
+                text = "${state.name.shortAtbName()}"
               )
             }
             Box(
               modifier = Modifier.width(30.dp)
             ) {
               Text(
-                text = "${state.atbSize}", style = TextStyle(
-                  color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Bold
-                )
+                text = "${state.atbSize}"
               )
             }
             Spacer(modifier = Modifier.width(10.dp))
@@ -183,7 +196,11 @@ object PokeDetail {
                 .clip(shape = RoundedCornerShape(10.dp))
                 .fillMaxWidth()
                 .height(20.dp)
-                .background(Color.LightGray)
+                .background(
+                  state.name
+                    .atbColor()
+                    .copy(alpha = 0.2f)
+                )
             ) {
               Box(
                 Modifier

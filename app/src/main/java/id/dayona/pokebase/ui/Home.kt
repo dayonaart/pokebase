@@ -23,68 +23,71 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import id.dayona.pokebase.MainViewModel
+import id.dayona.pokebase.MainModel.mainViewModel
 import id.dayona.pokebase.ui.Tools.Giffy
 import id.dayona.pokebase.ui.Tools.Loading
 
 object Home {
   @Composable
   fun View(
-    mainViewModel: MainViewModel, innerPad: PaddingValues, navController: NavController
+    innerPad: PaddingValues, navController: NavController
   ) {
     val fieldFocus = LocalFocusManager.current
-    Column(
-      modifier = Modifier.padding(innerPad)
-    ) {
-//      if (mainViewModel.pokeList.size >= mainViewModel.getDefaultEvoChain)
-      OutlinedTextField(
-        singleLine = true,
-        shape = RoundedCornerShape(8.dp),
-        trailingIcon = {
-          Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
-        },
-        placeholder = { Text(text = "Search Pokemon") },
-        modifier = Modifier.fillMaxWidth(),
-        value = mainViewModel.searchController,
-        onValueChange = mainViewModel::onSearchChange,
-        keyboardActions = KeyboardActions(onSearch = {
-          fieldFocus.clearFocus()
-        }),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
-      )
-      PokeList(mainViewModel = mainViewModel, navController)
+    if (mainViewModel.evolutionChainList.data.isEmpty()) {
+      Loading(label = "Please wait while\ngetting Pokemon data ${mainViewModel.evolutionChainList.progress}%")
+    } else {
+      Column(
+        modifier = Modifier
+          .padding(innerPad)
+          .padding(top = 10.dp)
+      ) {
+        OutlinedTextField(singleLine = true,
+          shape = RoundedCornerShape(8.dp),
+          trailingIcon = {
+            Icon(imageVector = Icons.Filled.Search, contentDescription = "Search")
+          },
+          placeholder = { Text(text = "Search Pokemon") },
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 10.dp, end = 10.dp),
+          value = mainViewModel.searchController,
+          onValueChange = mainViewModel::onSearchChange,
+          keyboardActions = KeyboardActions(onSearch = {
+            fieldFocus.clearFocus()
+          }),
+          keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
+        )
+        PokeList(navController)
+      }
     }
   }
 
   @Composable
-  private fun PokeList(mainViewModel: MainViewModel, navController: NavController) {
-    if (mainViewModel.evolutionChainList.isEmpty()) {
-      Loading()
-    } else {
-      LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 120.dp)
-      ) {
-        items(mainViewModel.evolutionChainList.take(500).size) {
-          val poke = mainViewModel.evolutionChainList[it]
-          val sprite = poke?.sprites?.other?.showdown?.frontDefault
-          Card(modifier = Modifier
-            .padding(10.dp)
-            .clickable {
-              mainViewModel.getPokemon(poke?.chain?.species?.name ?: "")
-              navController.navigate("poke_detail/${poke?.chain?.species?.name}")
-            }) {
-            Column {
-              Text(
-                modifier = Modifier.padding(start = 5.dp), text = "${poke?.id ?: "Error"}"
-              )
-              Giffy(
-                url = "$sprite", size = 80.dp
-              )
-              Text(
-                modifier = Modifier.fillMaxWidth(), text = "${poke?.chain?.species?.name}",
-                textAlign = TextAlign.Center
-              )
-            }
+  private fun PokeList(navController: NavController) {
+    LazyVerticalGrid(
+      columns = GridCells.Adaptive(minSize = 120.dp)
+    ) {
+      items(mainViewModel.evolutionChainList.data.take(50).size) {
+        val poke = mainViewModel.evolutionChainList.data[it]
+        val sprite = poke?.sprites?.other?.showdown?.frontDefault
+        Card(modifier = Modifier
+          .padding(10.dp)
+          .clickable {
+            mainViewModel.getPokemon(poke?.chain?.species?.name ?: "")
+            navController.navigate("poke_detail/${poke?.chain?.species?.name}")
+          }) {
+          Column {
+            Text(
+              modifier = Modifier.padding(start = 5.dp), text = "${poke?.id ?: "Error"}"
+            )
+            Giffy(
+              url = "$sprite", size = 80.dp
+            )
+            Text(
+              modifier = Modifier.fillMaxWidth(),
+              text = "${poke?.chain?.species?.name}",
+              textAlign = TextAlign.Center
+            )
           }
         }
       }

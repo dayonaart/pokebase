@@ -73,7 +73,27 @@ data class Sprites(
   @field:SerializedName("back_shiny") val backShiny: String? = null,
 
   @field:SerializedName("front_shiny") val frontShiny: String? = null
-)
+) {
+  fun toList(): List<Any?> {
+    return listOf(
+      this.frontDefault,
+      this.frontShinyFemale,
+      this.frontFemale,
+      this.other?.dreamWorld?.frontDefault,
+      this.other?.dreamWorld?.frontFemale,
+      this.other?.officialArtwork?.frontDefault,
+      this.other?.officialArtwork?.frontShiny,
+      this.other?.home?.frontDefault,
+      this.other?.home?.frontFemale,
+      this.other?.home?.frontShiny,
+      this.other?.home?.frontShinyFemale,
+      this.other?.showdown?.frontDefault,
+      this.other?.showdown?.frontShiny,
+      this.other?.showdown?.frontFemale,
+      this.other?.showdown?.frontShinyFemale,
+    )
+  }
+}
 
 data class Versions(
 

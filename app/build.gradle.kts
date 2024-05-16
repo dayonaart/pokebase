@@ -65,8 +65,15 @@ dependencies {
   debugImplementation(libs.androidx.ui.tooling)
   debugImplementation(libs.androidx.ui.test.manifest)
   implementation(libs.androidx.navigation.compose)
+
   implementation(libs.coil.gif)
   implementation(libs.coil.compose)
   implementation(libs.gson)
+//  implementation(libs.retrofit)
+//  implementation(libs.converter.gson)
+//  implementation(libs.okhttp)
+//  implementation(libs.logging.interceptor)
   implementation(project(":pokeservices"))
+//  implementation(fileTree("src/main/libs/"))
+
 }

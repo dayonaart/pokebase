@@ -3,18 +3,16 @@ package id.dayona.pokebase
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -30,26 +28,24 @@ class MainActivity : ComponentActivity() {
   private val mainViewModel by lazy { MainViewModel() }
 
   private val homeTab = TabBarItem(
-    title = "Home", selectedIcon = Icons.Filled.Home, unselectedIcon = Icons.Outlined.Home
+    title = "Home"
   )
   private val alertsTab = TabBarItem(
-    title = "Table",
-    selectedIcon = Icons.Filled.Menu,
-    unselectedIcon = Icons.Outlined.Menu,
+    title = "Table"
   )
   private val settingsTab = TabBarItem(
-    title = "Settings",
-    selectedIcon = Icons.Filled.Settings,
-    unselectedIcon = Icons.Outlined.Settings
+    title = "Settings"
   )
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    MainModel.mainViewModel = mainViewModel
+    //MUST BE INIT HERE FOR DATABASE
+//    this.getExternalFilesDirs("database")
     val tabBarItems = listOf(homeTab, alertsTab, settingsTab)
-    PokeDetail.mainViewModel = mainViewModel
     setContent {
       val navController = rememberNavController()
-      PokeBaseTheme {
+      PokeBaseTheme(darkTheme = mainViewModel.darkMode) {
         Surface(
           modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
         ) {
@@ -58,14 +54,27 @@ class MainActivity : ComponentActivity() {
             NavHost(navController = navController, startDestination = homeTab.title) {
               composable(homeTab.title) {
                 Home.View(
-                  mainViewModel = mainViewModel, innerPad = innerPad, navController = navController
+                  innerPad = innerPad, navController = navController
                 )
               }
               composable(alertsTab.title) {
-                PokeTable.View(mainViewModel = mainViewModel, innerPad = innerPad)
+                PokeTable.View(innerPad = innerPad)
+
               }
               composable(settingsTab.title) {
-                Text(settingsTab.title)
+                Column(
+                  modifier = Modifier
+                    .padding(innerPad)
+                    .fillMaxSize(),
+                  horizontalAlignment = Alignment.CenterHorizontally,
+                  verticalArrangement = Arrangement.Center
+                ) {
+                  ElevatedButton(onClick = {
+                    mainViewModel.changeThemeMode()
+                  }) {
+                    Text(text = if (mainViewModel.darkMode) "Light Mode" else "Dark Mode")
+                  }
+                }
               }
               composable(
                 "poke_detail/{id}",
@@ -83,3 +92,5 @@ class MainActivity : ComponentActivity() {
     }
   }
 }
+
+
