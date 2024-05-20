@@ -5,4 +5,4 @@ On this page below you'll find the recent Pokémon news and updates to this site
 the menu above to find detailed Pokédex entries, attack stats, evolution chains and our thriving
 community of awesome Pokéfans who'll answer your questions. And much more besides!
 
-![image info](pokeservices/assets/home.png =100x20)
+<img src="pokeservices/assets/home.png" width="200" height="400"  alt="home"/>
