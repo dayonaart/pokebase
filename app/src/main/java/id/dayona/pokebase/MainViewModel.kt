@@ -3,6 +3,7 @@ package id.dayona.pokebase
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.IntSize
@@ -14,8 +15,10 @@ import id.dayona.pokeservices.network.CoreException
 import id.dayona.pokeservices.network.CoreSuccess
 import id.dayona.pokeservices.network.CoreTimeout
 import id.dayona.pokeservices.network.Loading
+import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
 import id.dayona.pokeservices.pokedata.evochain.EvolutionData
 import id.dayona.pokeservices.pokedata.pokemon.Pokemon
+import id.dayona.pokeservices.pokedata.pokemon.PokemonColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -23,8 +26,10 @@ import kotlinx.coroutines.launch
 object MainModel {
   lateinit var mainViewModel: MainViewModel
 }
+
 class MainViewModel : ViewModel() {
   private val pokeServices = PokeServices()
+  var pokeShow by mutableIntStateOf(50)
   var pokemon by mutableStateOf<Pokemon?>(null)
   var evoList by mutableStateOf(
     EvolutionData(
@@ -74,11 +79,16 @@ class MainViewModel : ViewModel() {
 
           Loading -> {
             println(it.toString())
+          }
         }
       }
     }
   }
+
+  fun getPokemonShow(): List<EvolutionChain?> {
+    return evoList.data.take(pokeShow)
   }
+
   fun getPokemon(id: String) {
     viewModelScope.launch(Dispatchers.IO) {
       pokeServices.repositories.getPokemon(id).collectLatest {
@@ -110,6 +120,7 @@ class MainViewModel : ViewModel() {
       }
     }
   }
+
   fun cries(url: String?) {
     viewModelScope.launch(Dispatchers.IO) {
       try {
@@ -132,9 +143,17 @@ class MainViewModel : ViewModel() {
     evoList = pokeServices.repositories.searchEvolutionChainList(searchController)
   }
 
+  fun sortPokemon(asc: Boolean?) {
+    evoList = pokeServices.repositories.sortEvolutionChainList(asc)
+  }
+
   fun calculateBaseAtb(atb: Float): Int {
     println((atb.toInt() * screenSize.width.div(maxAtb)) + (screenSize.width % maxAtb))
     return (atb.toInt() * screenSize.width.div(maxAtb)) + (screenSize.width % maxAtb)
+  }
+
+  fun getColor(name: String): PokemonColor? {
+    return pokeServices.repositories.getPokemonColor(name)
   }
 
   fun changeThemeMode() {

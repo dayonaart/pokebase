@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -28,19 +29,32 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import id.dayona.pokebase.MainModel.mainViewModel
+import id.dayona.pokebase.R
 import id.dayona.pokebase.TabBarItem
 import id.dayona.pokebase.TabView
 import id.dayona.pokebase.atb
 import id.dayona.pokebase.atbColor
+import id.dayona.pokebase.pokemonColor
 import id.dayona.pokebase.shortAtbName
 import id.dayona.pokebase.ui.Tools.Giffy
 import id.dayona.pokebase.ui.Tools.Loading
+import id.dayona.pokebase.ui.theme.Blue
+import id.dayona.pokebase.ui.theme.Cyan
+import id.dayona.pokebase.ui.theme.Gray
+import id.dayona.pokebase.ui.theme.LightBlue
+import id.dayona.pokebase.ui.theme.Red
 import id.dayona.pokebase.ui.theme.Typography
+import id.dayona.pokebase.ui.theme.White
 import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
 import java.util.Locale
 
@@ -62,19 +76,38 @@ object PokeDetail {
 
   @Composable
   fun View(innerPad: PaddingValues, id: String) {
-    ScaffoldView(innerPad, id)
+    BodyView(innerPad, id)
   }
+
   @Composable
-  private fun ScaffoldView(innerPad: PaddingValues, id: String) {
+  private fun BodyView(innerPad: PaddingValues, id: String) {
     val tabEnt = listOf(baseStats, evolution, artWork, settingsTab)
     val navController = rememberNavController()
-    val evolutionChain =
-      mainViewModel.evoList.data.find { it?.chain?.species?.name == id }
+    val evolutionChain = mainViewModel.evoList.data.find { it?.chain?.species?.name == id }
     Column(
-      modifier = Modifier
-        .padding(innerPad)
+      modifier = Modifier.padding(innerPad)
     ) {
-      Giffy(url = evolutionChain?.sprites?.other?.officialArtwork?.frontDefault ?: "")
+      Box(
+        modifier = Modifier
+          .background(
+            mainViewModel.getColor(
+              evolutionChain?.chain?.species?.name ?: ""
+            )?.name
+              .pokemonColor()
+              .copy(alpha = 0.5f)
+          )
+          .fillMaxWidth()
+          .height(200.dp)
+          .paint(
+            painterResource(id = R.drawable.pokeball_gray),
+            alpha = 0.3f,
+          ), contentAlignment = Alignment.Center
+      ) {
+        Giffy(
+          url = evolutionChain?.sprites?.other?.officialArtwork?.frontDefault ?: "",
+          size = 150.dp
+        )
+      }
       Scaffold(topBar = { TabView(tabEnt, navController, tabHeight = 50) }) { ip ->
         NavHost(navController = navController, startDestination = tabEnt.first().title) {
           tabEnt.forEach { t ->
@@ -97,8 +130,9 @@ object PokeDetail {
                 }
 
                 "Art Work" -> {
-                  val sprites = mainViewModel.pokemon?.sprites?.toList()
-                    ?.filterNotNull()?.filter { f -> !(f as String).contains(".svg") }
+                  val sprites =
+                    mainViewModel.pokemon?.sprites?.toList()?.filterNotNull()
+                      ?.filter { f -> !(f as String).contains(".svg") }
                   Column(
                     modifier = Modifier
                       .padding(ip)

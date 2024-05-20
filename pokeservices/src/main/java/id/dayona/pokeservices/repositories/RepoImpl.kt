@@ -10,6 +10,7 @@ import id.dayona.pokeservices.network.Loading
 import id.dayona.pokeservices.network.Module
 import id.dayona.pokeservices.pokedata.evochain.EvolutionData
 import id.dayona.pokeservices.pokedata.pokemon.Pokemon
+import id.dayona.pokeservices.pokedata.pokemon.PokemonColor
 import id.dayona.pokeservices.util.Utilities
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -23,7 +24,6 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 internal class RepoImpl : Repositories {
-
   override fun getEvolutionChainList(): Flow<Core<EvolutionData?>> {
     return flow {
       emit(Loading)
@@ -31,7 +31,13 @@ internal class RepoImpl : Repositories {
         delay(500)
         val existing = Utilities.readEvoChainData().toMutableList()
         if (existing.size >= Constant.POKEMON_SIZE) {
-          emit(CoreSuccess(data = EvolutionData(data = existing.toList(), progress = 100)))
+          emit(
+            CoreSuccess(
+              data = EvolutionData(
+                data = existing.toList(), progress = 100
+              )
+            )
+          )
         }
         ((existing.size + 1)..Constant.POKEMON_SIZE).forEachIndexed { _, i ->
           val evo = Module.repo().getEvolutionChain("$i")
@@ -71,7 +77,7 @@ internal class RepoImpl : Repositories {
     }.flowOn(Dispatchers.IO)
   }
 
-  override suspend fun getPokemon(id: String): Flow<Core<Pokemon?>> {
+  override fun getPokemon(id: String): Flow<Core<Pokemon?>> {
     return flow {
       emit(Loading)
       try {
@@ -91,7 +97,48 @@ internal class RepoImpl : Repositories {
       } catch (e: Exception) {
         emit(CoreException(e = "${e.message}"))
       }
-    }
+    }.flowOn(Dispatchers.IO)
+  }
+
+  override fun getColors(): Flow<Core<List<PokemonColor?>>> {
+    return flow {
+      emit(Loading)
+      try {
+        if (Utilities.readEvoColorsData().isNotEmpty()) {
+          emit(CoreSuccess(data = Utilities.readEvoColorsData()))
+          return@flow
+        }
+        val data = mutableListOf<PokemonColor?>()
+        (1..10).forEachIndexed { _, i ->
+          val res = Module.repo().getColor("$i")
+          if (res.isSuccessful) {
+            data += res.body()
+          } else {
+            data += null
+          }
+          Utilities.saveEvoColorsData(Gson().toJson(data))
+          emit(CoreSuccess(data = data))
+        }
+      } catch (e: SocketTimeoutException) {
+        emit(CoreTimeout)
+      } catch (e: SocketException) {
+        emit(CoreException(e = "${e.message}"))
+      } catch (e: UnknownHostException) {
+        emit(CoreException(e = "${e.message}"))
+      } catch (e: IOException) {
+        emit(CoreException(e = "${e.message}"))
+      } catch (e: HttpException) {
+        emit(CoreException(e = "${e.message}"))
+      } catch (e: Exception) {
+        emit(CoreException(e = "${e.message}"))
+      }
+    }.flowOn(Dispatchers.IO)
+  }
+
+  override fun getPokemonColor(name: String): PokemonColor? {
+    val color = Utilities.readEvoColorsData()
+      .find { it?.pokemonSpecies?.find { n -> n?.name == name }?.name != null }
+    return color
   }
 
   override fun getEvoDatabase(): Flow<Core<EvolutionData>> {
@@ -133,11 +180,16 @@ internal class RepoImpl : Repositories {
                   )
                 )
                 body.close()
-                println("FLUSHING...")
                 outputStream.flush()
                 return@flow
               }
-              emit(CoreSuccess(data = EvolutionData(progress = progress, data = listOf())))
+              emit(
+                CoreSuccess(
+                  data = EvolutionData(
+                    progress = progress, data = listOf()
+                  )
+                )
+              )
             }
           }
         }
@@ -164,6 +216,18 @@ internal class RepoImpl : Repositories {
       EvolutionData(data = Utilities.readEvoChainData())
     } else {
       EvolutionData(data = f)
+    }
+  }
+
+  override fun sortEvolutionChainList(asc: Boolean?): EvolutionData {
+    val data = Utilities.readEvoChainData().sortedBy { it?.chain?.species?.name }
+    if (asc == null) {
+      return EvolutionData(data = Utilities.readEvoChainData())
+    }
+    return if (asc) {
+      EvolutionData(data = data)
+    } else {
+      EvolutionData(data = data.reversed())
     }
   }
 }

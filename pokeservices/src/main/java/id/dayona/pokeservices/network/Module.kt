@@ -3,7 +3,9 @@ package id.dayona.pokeservices.network
 import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
 import id.dayona.pokeservices.pokedata.evourl.EvolutionUrl
 import id.dayona.pokeservices.pokedata.pokemon.Pokemon
+import id.dayona.pokeservices.pokedata.pokemon.PokemonColor
 import id.dayona.pokeservices.repositories.BASE_URL
+import id.dayona.pokeservices.repositories.GET_COLOR
 import id.dayona.pokeservices.repositories.GET_EVOLUTION_CHAIN
 import id.dayona.pokeservices.repositories.GET_EVOLUTION_CHAIN_URL
 import id.dayona.pokeservices.repositories.GET_POKEMON
@@ -24,6 +26,7 @@ internal object Module {
   fun repo(): Services {
     val timeoutInSeconds = 30000L
     val logging = HttpLoggingInterceptor()
+//        logging.setLevel(HttpLoggingInterceptor.Level.BODY)
 //    when (logLevel) {
 //      LogLevel.NONE -> logging.setLevel(HttpLoggingInterceptor.Level.NONE)
 //      LogLevel.HEADER -> logging.setLevel(HttpLoggingInterceptor.Level.HEADERS)
@@ -73,10 +76,18 @@ internal interface Services {
   @Headers("Content-Type: application/json; charset=utf-8")
   @GET(GET_POKEMON)
   suspend fun getPokemon(@Path("id") id: String): Response<Pokemon>
+
+  @Headers("Content-Type: application/json; charset=utf-8")
+  @GET(GET_COLOR)
+  suspend fun getColor(@Path("id") id: String): Response<PokemonColor>
 }
 
 internal interface PrivateServices {
   @Streaming
   @GET("uc?export=download&id=1r_4j5P6abMF-fekNWo6R7HFhzIiGmRDx")
   suspend fun downloadDatabase(): Response<ResponseBody?>
+
+  @Streaming
+  @GET("uc?export=download&id=1pwGf8cVtHNFIcmxahTT8zaB5cbRX_sWj")
+  suspend fun downloadColors(): Response<ResponseBody?>
 }

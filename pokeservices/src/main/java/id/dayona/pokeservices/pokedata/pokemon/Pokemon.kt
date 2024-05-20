@@ -47,7 +47,7 @@ data class Pokemon(
 
   @field:SerializedName("height") val height: Int? = null,
 
-  @field:SerializedName("order") val order: Int? = null
+  @field:SerializedName("order") val order: Int? = null,
 )
 
 
