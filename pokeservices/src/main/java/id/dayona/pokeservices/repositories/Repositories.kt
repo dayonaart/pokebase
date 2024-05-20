@@ -4,6 +4,7 @@ import id.dayona.pokeservices.network.Core
 import id.dayona.pokeservices.pokedata.evochain.EvolutionData
 import id.dayona.pokeservices.pokedata.pokemon.Pokemon
 import id.dayona.pokeservices.pokedata.pokemon.PokemonColor
+import id.dayona.pokeservices.pokedata.species.Species
 import kotlinx.coroutines.flow.Flow
 
 interface Repositories {
@@ -12,6 +13,7 @@ interface Repositories {
   fun getPokemon(id: String): Flow<Core<Pokemon?>>
   fun getColors(): Flow<Core<List<PokemonColor?>>>
   fun getPokemonColor(name: String): PokemonColor?
+  fun getSpecies(id: String): Flow<Core<Species?>>
   fun getEvoDatabase(): Flow<Core<EvolutionData>>
   fun sortEvolutionChainList(asc: Boolean?): EvolutionData
 }

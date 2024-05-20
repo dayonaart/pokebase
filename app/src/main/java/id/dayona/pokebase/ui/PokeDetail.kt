@@ -15,13 +15,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,10 +31,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
-import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -45,22 +44,15 @@ import id.dayona.pokebase.TabView
 import id.dayona.pokebase.atb
 import id.dayona.pokebase.atbColor
 import id.dayona.pokebase.pokemonColor
-import id.dayona.pokebase.shortAtbName
 import id.dayona.pokebase.ui.Tools.Giffy
 import id.dayona.pokebase.ui.Tools.Loading
-import id.dayona.pokebase.ui.theme.Blue
-import id.dayona.pokebase.ui.theme.Cyan
-import id.dayona.pokebase.ui.theme.Gray
-import id.dayona.pokebase.ui.theme.LightBlue
-import id.dayona.pokebase.ui.theme.Red
 import id.dayona.pokebase.ui.theme.Typography
-import id.dayona.pokebase.ui.theme.White
 import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
 import java.util.Locale
 
 object PokeDetail {
-  private val baseStats = TabBarItem(
-    title = "Base Stats"
+  private val info = TabBarItem(
+    title = "Info"
   )
   private val evolution = TabBarItem(
     title = "Evolution",
@@ -81,7 +73,7 @@ object PokeDetail {
 
   @Composable
   private fun BodyView(innerPad: PaddingValues, id: String) {
-    val tabEnt = listOf(baseStats, evolution, artWork, settingsTab)
+    val tabEnt = listOf(info, evolution, artWork, settingsTab)
     val navController = rememberNavController()
     val evolutionChain = mainViewModel.evoList.data.find { it?.chain?.species?.name == id }
     Column(
@@ -104,8 +96,7 @@ object PokeDetail {
           ), contentAlignment = Alignment.Center
       ) {
         Giffy(
-          url = evolutionChain?.sprites?.other?.officialArtwork?.frontDefault ?: "",
-          size = 150.dp
+          url = evolutionChain?.sprites?.other?.officialArtwork?.frontDefault ?: "", size = 150.dp
         )
       }
       Scaffold(topBar = { TabView(tabEnt, navController, tabHeight = 50) }) { ip ->
@@ -113,8 +104,8 @@ object PokeDetail {
           tabEnt.forEach { t ->
             composable(t.title) {
               when (t.title) {
-                "Base Stats" -> {
-                  BaseStats(ip, evolutionChain)
+                "Info" -> {
+                  Info(ip, evolutionChain)
                 }
 
                 "Evolution" -> {
@@ -130,9 +121,8 @@ object PokeDetail {
                 }
 
                 "Art Work" -> {
-                  val sprites =
-                    mainViewModel.pokemon?.sprites?.toList()?.filterNotNull()
-                      ?.filter { f -> !(f as String).contains(".svg") }
+                  val sprites = mainViewModel.pokemon?.sprites?.toList()?.filterNotNull()
+                    ?.filter { f -> !(f as String).contains(".svg") }
                   Column(
                     modifier = Modifier
                       .padding(ip)
@@ -173,11 +163,12 @@ object PokeDetail {
 
   @SuppressLint("ResourceType")
   @Composable
-  private fun BaseStats(
+  private fun Info(
     innerPad: PaddingValues,
     evolutionChain: EvolutionChain?,
   ) {
-    val baseStats = mainViewModel.pokemon?.stats?.map {
+    val flText = mainViewModel.species?.flavorTextEntries?.filter { it?.language?.name == "en" }
+    val baseStatus = mainViewModel.pokemon?.stats?.map {
       BaseStatsData(
         name = it?.stat?.name ?: "", atbAnim = animateFloatAsState(
           it?.baseStat?.toFloat() ?: 0f, label = "test", animationSpec = tween(
@@ -204,50 +195,70 @@ object PokeDetail {
       }
       Spacer(modifier = Modifier.height(20.dp))
       if (!mainViewModel.getPokeLoading) {
-        baseStats?.forEachIndexed { _, state ->
-          Row(
-            modifier = Modifier
-              .fillMaxWidth()
-              .padding(bottom = 3.dp)
-          ) {
-            Box(
-              modifier = Modifier.width(60.dp)
-            ) {
-              Text(
-                text = "${state.name.shortAtbName()}"
-              )
-            }
-            Box(
-              modifier = Modifier.width(30.dp)
-            ) {
-              Text(
-                text = "${state.atbSize}"
-              )
-            }
-            Spacer(modifier = Modifier.width(10.dp))
-            Box(
-              Modifier
-                .clip(shape = RoundedCornerShape(10.dp))
-                .fillMaxWidth()
-                .height(20.dp)
-                .background(
-                  state.name
-                    .atbColor()
-                    .copy(alpha = 0.2f)
-                )
-            ) {
-              Box(
-                Modifier
-                  .clip(shape = RoundedCornerShape(10.dp))
-                  .fillMaxWidth(state.atbAnim.value.atb())
-                  .height(20.dp)
-                  .background(state.name.atbColor())
-              )
-            }
+        BaseStatus(baseStatus = baseStatus)
+        Spacer(modifier = Modifier.height(20.dp))
+        flText?.forEach {
+          Column {
+            Text(
+              text = "Version ${it?.version?.name}",
+              style = Typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+            )
+            HorizontalDivider()
+            Text(text = "${it?.flavorText}")
+            Spacer(modifier = Modifier.height(10.dp))
           }
         }
       } else {
         Loading(size = 100)
+      }
+    }
+  }
+
+  @Composable
+  fun BaseStatus(baseStatus: List<BaseStatsData>?) {
+    baseStatus?.forEachIndexed { _, state ->
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(bottom = 3.dp),
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        Box(
+          modifier = Modifier.fillMaxWidth(0.3f)
+        ) {
+          Text(
+            text = state.name.uppercase(),
+            style = Typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+          )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        Box(
+          modifier = Modifier.fillMaxWidth(0.1f)
+        ) {
+          Text(
+            text = "${state.atbSize}",
+            style = Typography.bodySmall.copy(fontWeight = FontWeight.Bold)
+          )
+        }
+        Box(
+          Modifier
+            .clip(shape = RoundedCornerShape(10.dp))
+            .fillMaxWidth()
+            .height(15.dp)
+            .background(
+              state.name
+                .atbColor()
+                .copy(alpha = 0.2f)
+            ), contentAlignment = Alignment.CenterStart
+        ) {
+          Box(
+            Modifier
+              .clip(shape = RoundedCornerShape(10.dp))
+              .fillMaxWidth(state.atbAnim.value.atb())
+              .height(15.dp)
+              .background(state.name.atbColor())
+          )
+        }
       }
     }
   }

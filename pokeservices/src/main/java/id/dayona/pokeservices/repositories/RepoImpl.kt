@@ -11,6 +11,7 @@ import id.dayona.pokeservices.network.Module
 import id.dayona.pokeservices.pokedata.evochain.EvolutionData
 import id.dayona.pokeservices.pokedata.pokemon.Pokemon
 import id.dayona.pokeservices.pokedata.pokemon.PokemonColor
+import id.dayona.pokeservices.pokedata.species.Species
 import id.dayona.pokeservices.util.Utilities
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -139,6 +140,29 @@ internal class RepoImpl : Repositories {
     val color = Utilities.readEvoColorsData()
       .find { it?.pokemonSpecies?.find { n -> n?.name == name }?.name != null }
     return color
+  }
+
+  override fun getSpecies(id: String): Flow<Core<Species?>> {
+    return flow {
+      emit(Loading)
+      try {
+        val res = Module.repo().getSpecies(id)
+        if (!res.isSuccessful) emit(CoreError(code = res.code(), message = res.message()))
+        emit(CoreSuccess(data = res.body()))
+      } catch (e: SocketTimeoutException) {
+        emit(CoreTimeout)
+      } catch (e: SocketException) {
+        emit(CoreException(e = "${e.message}"))
+      } catch (e: UnknownHostException) {
+        emit(CoreException(e = "${e.message}"))
+      } catch (e: IOException) {
+        emit(CoreException(e = "${e.message}"))
+      } catch (e: HttpException) {
+        emit(CoreException(e = "${e.message}"))
+      } catch (e: Exception) {
+        emit(CoreException(e = "${e.message}"))
+      }
+    }.flowOn(Dispatchers.IO)
   }
 
   override fun getEvoDatabase(): Flow<Core<EvolutionData>> {

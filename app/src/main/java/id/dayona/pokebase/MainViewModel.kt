@@ -19,6 +19,7 @@ import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
 import id.dayona.pokeservices.pokedata.evochain.EvolutionData
 import id.dayona.pokeservices.pokedata.pokemon.Pokemon
 import id.dayona.pokeservices.pokedata.pokemon.PokemonColor
+import id.dayona.pokeservices.pokedata.species.Species
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ class MainViewModel : ViewModel() {
   private val pokeServices = PokeServices()
   var pokeShow by mutableIntStateOf(50)
   var pokemon by mutableStateOf<Pokemon?>(null)
+  var species by mutableStateOf<Species?>(null)
   var evoList by mutableStateOf(
     EvolutionData(
       data = listOf(), progress = 0
@@ -80,6 +82,32 @@ class MainViewModel : ViewModel() {
           Loading -> {
             println(it.toString())
           }
+        }
+      }
+    }
+  }
+
+  fun getSpecies(id: String) {
+    viewModelScope.launch(Dispatchers.IO) {
+      pokeServices.repositories.getSpecies(id).collectLatest {
+        when (it) {
+          is CoreError -> {
+            species = null
+          }
+
+          is CoreException -> {
+            species = null
+          }
+
+          is CoreSuccess -> {
+            species = it.data
+          }
+
+          CoreTimeout -> {
+            species = null
+          }
+
+          Loading -> {}
         }
       }
     }

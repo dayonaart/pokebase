@@ -4,11 +4,13 @@ import id.dayona.pokeservices.pokedata.evochain.EvolutionChain
 import id.dayona.pokeservices.pokedata.evourl.EvolutionUrl
 import id.dayona.pokeservices.pokedata.pokemon.Pokemon
 import id.dayona.pokeservices.pokedata.pokemon.PokemonColor
+import id.dayona.pokeservices.pokedata.species.Species
 import id.dayona.pokeservices.repositories.BASE_URL
 import id.dayona.pokeservices.repositories.GET_COLOR
 import id.dayona.pokeservices.repositories.GET_EVOLUTION_CHAIN
 import id.dayona.pokeservices.repositories.GET_EVOLUTION_CHAIN_URL
 import id.dayona.pokeservices.repositories.GET_POKEMON
+import id.dayona.pokeservices.repositories.GET_SPECIES
 import id.dayona.pokeservices.repositories.PRIVATE_BASE_URL
 import okhttp3.OkHttpClient
 import okhttp3.ResponseBody
@@ -46,13 +48,6 @@ internal object Module {
   fun privateRepo(): PrivateServices {
     val timeoutInSeconds = 30000L
     val logging = HttpLoggingInterceptor()
-//    when (logLevel) {
-//      LogLevel.NONE -> logging.setLevel(HttpLoggingInterceptor.Level.NONE)
-//      LogLevel.HEADER -> logging.setLevel(HttpLoggingInterceptor.Level.HEADERS)
-//      LogLevel.BODY -> logging.setLevel(HttpLoggingInterceptor.Level.BODY)
-//      LogLevel.RESPONSE -> logging.setLevel(HttpLoggingInterceptor.Level.NONE)
-//      LogLevel.FULL -> logging.setLevel(HttpLoggingInterceptor.Level.BODY)
-//    }
     val http = OkHttpClient().newBuilder().addInterceptor(logging)
       .connectTimeout(timeoutInSeconds, TimeUnit.SECONDS)
       .readTimeout(timeoutInSeconds, TimeUnit.SECONDS)
@@ -80,6 +75,10 @@ internal interface Services {
   @Headers("Content-Type: application/json; charset=utf-8")
   @GET(GET_COLOR)
   suspend fun getColor(@Path("id") id: String): Response<PokemonColor>
+
+  @Headers("Content-Type: application/json; charset=utf-8")
+  @GET(GET_SPECIES)
+  suspend fun getSpecies(@Path("id") id: String): Response<Species>
 }
 
 internal interface PrivateServices {

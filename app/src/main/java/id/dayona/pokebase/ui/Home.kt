@@ -104,6 +104,7 @@ object Home {
         val poke = mainViewModel.evoList.data[it]
         val sprite = poke?.sprites?.other?.showdown?.frontDefault
         Card(modifier = Modifier.clickable {
+          mainViewModel.getSpecies(poke?.chain?.species?.name ?: "")
           mainViewModel.getPokemon(poke?.chain?.species?.name ?: "")
           navController.navigate("poke_detail/${poke?.chain?.species?.name}")
         }) {
