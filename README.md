@@ -5,6 +5,4 @@ On this page below you'll find the recent Pokémon news and updates to this site
 the menu above to find detailed Pokédex entries, attack stats, evolution chains and our thriving
 community of awesome Pokéfans who'll answer your questions. And much more besides!
 
-
-<img src="![home.png](..%2F..%2FMusic%2Fhome.png)" alt="My cool logo"/>
-# My cool project and above is the logo of it
+![alt text](![home.png](..%2F..%2FMusic%2Fhome.png) "Home")
