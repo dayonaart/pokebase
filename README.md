@@ -1,12 +1,9 @@
-Welcome to The Pokémon Database! We believe in making Pokémon information as clear and easy to
-digest as possible.
+# **PokeBase**
 
-On this page below you'll find the recent Pokémon news and updates to this site. Delve deeper using
-the menu above to find detailed Pokédex entries, attack stats, evolution chains and our thriving
-community of awesome Pokéfans who'll answer your questions. And much more besides!
+##Aplikasi Pokemon Database
 
 <div>
 <img src="pokeservices/assets/home.png" width="200" height="400"  alt="home"/>
-<img src="pokeservices/assets/detail.png" width="200" height="400"  alt="home"/>
-<img src="pokeservices/assets/table.png" width="200" height="400"  alt="home"/>
+<img src="pokeservices/assets/detail.png" width="200" height="400"  alt="detail"/>
+<img src="pokeservices/assets/table.png" width="200" height="400"  alt="table"/>
 </div>
