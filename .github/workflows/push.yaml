@@ -11,7 +11,7 @@ on:
     branches: [ "master" ]
     tags: [ "Release Apk" ]
   # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+#  workflow_dispatch:
 #    inputs:
 #      refToBuild:
 #        description: 'Release'
