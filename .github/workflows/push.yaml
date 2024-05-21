@@ -7,18 +7,12 @@ env:
   play_store_name: PokeBase
 
 on:
-  push:
-    branches:
-      - 'master'
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
     inputs:
       refToBuild:
         description: 'Release'
         required: true
         type: string
-
 jobs:
   build:
     runs-on: ubuntu-latest
