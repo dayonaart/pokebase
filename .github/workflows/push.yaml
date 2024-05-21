@@ -1,23 +1,30 @@
 name: Generated APK AAB
 
 env:
+  # The name of the main module repository
   main_project_module: app
+  # The name of the Play Store
   play_store_name: PokeBase
 
 on:
+  push:
+    branches: [ "master" ]
+    tags: [ "Release Apk" ]
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-    inputs:
-      refToBuild:
-        description: 'Release'
-        required: true
-        type: string
+#    inputs:
+#      refToBuild:
+#        description: 'Release'
+#        required: true
+#        type: string
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ inputs.refToBuild }}
+      #        with:
+      #          ref: ${{ inputs.refToBuild }}
       # Set Current Date As Env Variable
       - name: Set current date as env variable
         run: echo "date_today=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
